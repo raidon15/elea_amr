@@ -39,9 +39,14 @@ def generate_launch_description():
         description='Full path to world model file to load')
 
     # Specify the actions
-    start_gazebo_cmd = ExecuteProcess(
-        cmd=['ign', 'gazebo', '-r', world],
-        output='screen')
+    pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
+    gz_sim_launch = os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
+    start_gazebo_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(gz_sim_launch),
+        launch_arguments={
+            'gz_args': [world, ' -r']
+        }.items()
+    )
 
     # Start robot state publisher
     urdf_file = os.path.join(pkg_dir, 'urdf', 'elea_diff_robot.urdf')
