@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.conditions import IfCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch_ros.actions import Node
+
+
+def generate_launch_description():
+    # Get the launch directory
+    pkg_dir = get_package_share_directory('elea_amr')
+    
+    # Launch configuration variables specific to simulation
+    x_pose = LaunchConfiguration('x_pose', default='0.0')
+    y_pose = LaunchConfiguration('y_pose', default='0.0')
+    z_pose = LaunchConfiguration('z_pose', default='0.57025')
+    world = LaunchConfiguration('world')
+    
+    # Declare the launch arguments
+    declare_x_position_cmd = DeclareLaunchArgument(
+        'x_pose', default_value='0.0',
+        description='Specify namespace of the robot')
+
+    declare_y_position_cmd = DeclareLaunchArgument(
+        'y_pose', default_value='0.0',
+        description='Specify namespace of the robot')
+        
+    declare_z_position_cmd = DeclareLaunchArgument(
+        'z_pose', default_value='0.57025',
+        description='Specify z position of the robot')
+
+    declare_world_cmd = DeclareLaunchArgument(
+        'world',
+        default_value='empty.sdf',
+        description='Full path to world model file to load')
+
+    # Specify the actions
+    start_gazebo_cmd = ExecuteProcess(
+        cmd=['ign', 'gazebo', '-r', world],
+        output='screen')
+
+    # Start robot state publisher
+    urdf_file = os.path.join(pkg_dir, 'urdf', 'elea_diff_robot.urdf')
+    
+    with open(urdf_file, 'r') as infp:
+        robot_description_content = infp.read()
+
+    robot_state_publisher_node = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': robot_description_content}],
+    )
+
+    # Spawn the robot
+    spawn_entity_cmd = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-topic', 'robot_description',
+                   '-name', 'elea_robot',
+                   '-x', x_pose,
+                   '-y', y_pose,
+                   '-z', z_pose],
+        output='screen')
+
+    # Bridge between ROS2 and Ignition Gazebo
+    bridge_cmd = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist',
+            '/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry',
+            '/tf@tf2_msgs/msg/TFMessage@ignition.msgs.Pose_V'
+        ],
+        output='screen')
+
+    # Create the launch description and populate
+    ld = LaunchDescription()
+
+    # Declare the launch options
+    ld.add_action(declare_x_position_cmd)
+    ld.add_action(declare_y_position_cmd)
+    ld.add_action(declare_z_position_cmd)
+    ld.add_action(declare_world_cmd)
+
+    # Add any conditioned actions
+    ld.add_action(start_gazebo_cmd)
+    ld.add_action(robot_state_publisher_node)
+    ld.add_action(spawn_entity_cmd)
+    ld.add_action(bridge_cmd)
+
+    return ld
