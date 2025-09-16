@@ -80,7 +80,9 @@ def generate_launch_description():
         arguments=[
             '/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist',
             '/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry',
-            '/tf@tf2_msgs/msg/TFMessage@ignition.msgs.Pose_V'
+            '/tf@tf2_msgs/msg/TFMessage@ignition.msgs.Pose_V',
+            '/world/empty/model/elea_robot/link/base_link/sensor/lidar/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
+            '--ros-args', '-r', '/world/empty/model/elea_robot/link/base_link/sensor/lidar/scan:=/scan'
         ],
         output='screen')
 

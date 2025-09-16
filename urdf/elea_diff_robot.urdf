@@ -6,7 +6,7 @@
   <link name="base_link">
     <visual>
       <geometry>
-        <box size="1.849 1.445 1.0205"/>
+        <box size="1.849 1.445 0.51025"/>
       </geometry>
       <material name="gray">
         <color rgba="0.6 0.6 0.6 1"/>
@@ -14,7 +14,7 @@
     </visual>
     <collision>
       <geometry>
-        <box size="1.849 1.445 1.0205"/>
+        <box size="1.849 1.445 0.51025"/>
       </geometry>
     </collision>
     <inertial>
@@ -118,28 +118,168 @@
     </collision>
   </link>
 
+  <!-- APF Control Points -->
+  <!-- Front center control point -->
+  <link name="apf_front_center">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 0.5"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Front left control point -->
+  <link name="apf_front_left">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 0.5"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Front right control point -->
+  <link name="apf_front_right">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 0.5"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Rear center control point -->
+  <link name="apf_rear_center">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 0.5"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Left side control point -->
+  <link name="apf_left_side">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 0.5"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Right side control point -->
+  <link name="apf_right_side">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 0.5"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- LIDAR sensor -->
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
   <!-- Joints -->
   <joint name="left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="left_wheel"/>
-    <origin xyz="0 0.7425 -0.51025" rpy="1.5708 0 0"/>
+    <origin xyz="0 0.7425 -0.255125" rpy="1.5708 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
   <joint name="right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="right_wheel"/>
-    <origin xyz="0 -0.7425 -0.51025" rpy="1.5708 0 0"/>
+    <origin xyz="0 -0.7425 -0.255125" rpy="1.5708 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
   <joint name="front_support_joint" type="fixed">
     <parent link="base_link"/>
     <child link="front_support_wheel"/>
-    <origin xyz="0.9245 0 -0.54025" rpy="0 0 0"/>
+    <origin xyz="0.9245 0 -0.285125" rpy="0 0 0"/>
   </joint>
   <joint name="rear_support_joint" type="fixed">
     <parent link="base_link"/>
     <child link="rear_support_wheel"/>
-    <origin xyz="-0.9245 0 -0.54025" rpy="0 0 0"/>
+    <origin xyz="-0.9245 0 -0.285125" rpy="0 0 0"/>
+  </joint>
+
+
+  <!-- APF Control Point Joints -->
+  <joint name="apf_front_center_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_front_center"/>
+    <origin xyz="0.9245 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="apf_front_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_front_left"/>
+    <origin xyz="0.8 0.6 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="apf_front_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_front_right"/>
+    <origin xyz="0.8 -0.6 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="apf_rear_center_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_rear_center"/>
+    <origin xyz="-0.9245 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="apf_left_side_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_left_side"/>
+    <origin xyz="0 0.7225 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="apf_right_side_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_right_side"/>
+    <origin xyz="0 -0.7225 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- LIDAR Joint -->
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 0.255125" rpy="0 0 0"/>
   </joint>
 
   <!-- Gazebo Differential Drive Plugin -->
@@ -151,7 +291,41 @@
       <wheel_radius>0.06</wheel_radius>
       <odom_publish_frequency>50</odom_publish_frequency>
       <topic>cmd_vel</topic>
-      
     </plugin>
   </gazebo>
+
+  <!-- Gazebo LIDAR Plugin -->
+  <gazebo reference="lidar_link">
+      <sensor name="lidar" type="gpu_lidar">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>true</visualize>
+        <update_rate>10</update_rate>
+        <always_on>1</always_on>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>360</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </lidar>
+        <plugin filename="libgz-sim-sensors-system.so" name="gz::sim::systems::Sensors">
+          <topic>lidar/scan</topic>
+        </plugin>
+      </sensor>
+  </gazebo>
+
+  
 </robot>
