@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="DigilabRollup">
+    <static>true</static>
+    <link name="cell_link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://DigilabRollup/meshes/DigilabRollup.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://DigilabRollup/meshes/DigilabRollup.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
