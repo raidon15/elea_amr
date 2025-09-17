@@ -1,5 +1,27 @@
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [ELEA AMR Launch Guide](#elea-amr-launch-guide)
+  - [📁 Available Launch Files](#-available-launch-files)
+    - [1. `launch_gazebo.launch.py` - Gazebo World Only](#1-launch_gazebolaunchpy---gazebo-world-only)
+    - [2. `spawn_robot_only.launch.py` - Robot Spawning Only](#2-spawn_robot_onlylaunchpy---robot-spawning-only)
+    - [3. `complete_simulation.launch.py` - Full Simulation](#3-complete_simulationlaunchpy---full-simulation)
+    - [4. `spawn_robot.launch.py` - Legacy Combined Launcher](#4-spawn_robotlaunchpy---legacy-combined-launcher)
+  - [🚀 Recommended Workflows](#-recommended-workflows)
+    - [Development Workflow (Separate Launches)](#development-workflow-separate-launches)
+    - [Production Workflow (Combined Launch)](#production-workflow-combined-launch)
+  - [🎮 Robot Control](#-robot-control)
+    - [Basic Movement Commands](#basic-movement-commands)
+  - [🔧 Troubleshooting](#-troubleshooting)
+    - [Common Issues](#common-issues)
+    - [Useful Debug Commands](#useful-debug-commands)
+  - [📋 Robot Specifications](#-robot-specifications)
+  - [🎯 Quick Reference](#-quick-reference)
+
+<!-- /code_chunk_output -->
+
 # ELEA AMR Launch Guide
 
 This document describes all available launch files and usage options for the ELEA AMR robot simulation.
