@@ -14,7 +14,6 @@ from launch.conditions import IfCondition
 def generate_launch_description():
     # Get the launch directory
     pkg_dir = get_package_share_directory('elea_amr')
-    tb_gazebo_dir = get_package_share_directory('elea_tb_gazebo')
     
     # Launch configuration variables specific to simulation
     x_pose = LaunchConfiguration('x_pose', default='0.0')

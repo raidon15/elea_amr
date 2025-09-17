@@ -5,20 +5,17 @@
   <!-- Main body -->
   <link name="base_link">
     <visual>
+      <origin xyz="0 0 -0.35" rpy="0 0 0"/>
       <geometry>
-        <box size="1.849 1.445 0.51025"/>  <!-- APF Control Point Joints -->
-  <joint name="apf_front_center_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="apf_front_center"/>
-    <origin xyz="0.9245 0 0.255125" rpy="0 0 0"/>
-  </joint> </geometry>
+        <mesh filename="package://elea_amr/urdf/KMP200.dae" scale="1 1 1"/>
+      </geometry>
       <material name="gray">
         <color rgba="0.6 0.6 0.6 1"/>
       </material>
     </visual>
     <collision>
       <geometry>
-        <box size="1.849 1.445 0.51025"/>
+        <box size="1.08 0.63 0.7"/>
       </geometry>
     </collision>
     <inertial>
@@ -123,6 +120,11 @@
   </link>
 
   <!-- APF Control Points -->
+  <!-- Left center control point -->
+  <link name="apf_left_center">
+    <!-- No visual geometry to avoid LIDAR detection -->
+  </link>
+
   <!-- Front center control point -->
   <link name="apf_front_center">
     <!-- No visual geometry to avoid LIDAR detection -->
@@ -154,24 +156,24 @@
   <joint name="left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="left_wheel"/>
-    <origin xyz="0 0.7425 -0.255125" rpy="1.5708 0 0"/>
+    <origin xyz="0 0.315 -0.35" rpy="1.5708 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
   <joint name="right_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="right_wheel"/>
-    <origin xyz="0 -0.7425 -0.255125" rpy="1.5708 0 0"/>
+    <origin xyz="0 -0.315 -0.35" rpy="1.5708 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
   <joint name="front_support_joint" type="fixed">
     <parent link="base_link"/>
     <child link="front_support_wheel"/>
-    <origin xyz="0.9245 0 -0.285125" rpy="0 0 0"/>
+    <origin xyz="0.54 0 -0.38" rpy="0 0 0"/>
   </joint>
   <joint name="rear_support_joint" type="fixed">
     <parent link="base_link"/>
     <child link="rear_support_wheel"/>
-    <origin xyz="-0.9245 0 -0.285125" rpy="0 0 0"/>
+    <origin xyz="-0.54 0 -0.38" rpy="0 0 0"/>
   </joint>
 
 
@@ -179,14 +181,20 @@
   <joint name="apf_left_center_joint" type="fixed">
     <parent link="base_link"/>
     <child link="apf_left_center"/>
-    <origin xyz="0 0.7225 0.255125" rpy="0 0 1.5708"/>
+    <origin xyz="0 0.315 0.35" rpy="0 0 1.5708"/>
+  </joint>
+
+  <joint name="apf_front_center_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_front_center"/>
+    <origin xyz="0.54 0 0.35" rpy="0 0 0"/>
   </joint>
 
   <!-- LIDAR Joint -->
   <joint name="lidar_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_link"/>
-    <origin xyz="0 0 0.255125" rpy="0 0 0"/>
+    <origin xyz="0 0 0.35" rpy="0 0 0"/>
   </joint>
 
   <!-- Gazebo Differential Drive Plugin -->
@@ -194,7 +202,7 @@
     <plugin filename="libignition-gazebo-diff-drive-system.so" name="ignition::gazebo::systems::DiffDrive">
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
-      <wheel_separation>1.485</wheel_separation>
+      <wheel_separation>0.63</wheel_separation>
       <wheel_radius>0.06</wheel_radius>
       <odom_publish_frequency>50</odom_publish_frequency>
       <topic>cmd_vel</topic>
