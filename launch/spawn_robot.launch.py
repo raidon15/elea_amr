@@ -92,22 +92,39 @@ def generate_launch_description():
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
             '/world/empty/model/elea_robot/link/base_link/sensor/lidar/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
             '--ros-args', '-r', '/world/empty/model/elea_robot/link/base_link/sensor/lidar/scan:=/scan'
-            
         ],
         output='screen')
 
    
-    # Static transform from lidar_link to match Gazebo frame naming
+    # Static transform for lidar frame compatibility
     static_transform_node = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='lidar_frame_publisher',
-        arguments=['0', '0', '0', '0', '0', '0', 'lidar_link', 'elea_robot/base_link/lidar'],
+        arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'elea_robot/base_link/lidar'],
+        output='screen'
+    )
+
+    # Static transform for base_footprint
+    base_footprint_transform_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_footprint_publisher',
+        arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint'],
+        output='screen'
+    )
+
+    # Laser scan frame filter to fix frame_id
+    laser_frame_filter_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='laser_frame_filter',
+        arguments=['0', '0', '0.255125', '0', '0', '0', 'base_link', 'lidar_link'],
         output='screen'
     )
 
     # RViz
-    rviz_config_file = os.path.join(pkg_dir, 'rviz', 'elea_amr.rviz')
+    rviz_config_file = '/workspaces/elea_ws/src/elea_amr/rviz/elea_amr.rviz'
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -135,6 +152,8 @@ def generate_launch_description():
     ld.add_action(spawn_entity_cmd)
     ld.add_action(bridge_cmd)
     ld.add_action(static_transform_node)
+    ld.add_action(base_footprint_transform_node)
+    ld.add_action(laser_frame_filter_node)
     ld.add_action(rviz_node)
 
     return ld

@@ -6,8 +6,12 @@
   <link name="base_link">
     <visual>
       <geometry>
-        <box size="1.849 1.445 0.51025"/>
-      </geometry>
+        <box size="1.849 1.445 0.51025"/>  <!-- APF Control Point Joints -->
+  <joint name="apf_front_center_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_front_center"/>
+    <origin xyz="0.9245 0 0.255125" rpy="0 0 0"/>
+  </joint> </geometry>
       <material name="gray">
         <color rgba="0.6 0.6 0.6 1"/>
       </material>
@@ -121,14 +125,7 @@
   <!-- APF Control Points -->
   <!-- Front center control point -->
   <link name="apf_front_center">
-    <visual>
-      <geometry>
-        <sphere radius="0.02"/>
-      </geometry>
-      <material name="red">
-        <color rgba="1 0 0 0.5"/>
-      </material>
-    </visual>
+    <!-- No visual geometry to avoid LIDAR detection -->
   </link>
 
   <!-- LIDAR sensor -->
@@ -179,10 +176,10 @@
 
 
   <!-- APF Control Point Joints -->
-  <joint name="apf_front_center_joint" type="fixed">
+  <joint name="apf_left_center_joint" type="fixed">
     <parent link="base_link"/>
-    <child link="apf_front_center"/>
-    <origin xyz="0.9245 0 0" rpy="0 0 0"/>
+    <child link="apf_left_center"/>
+    <origin xyz="0 0.7225 0.255125" rpy="0 0 1.5708"/>
   </joint>
 
   <!-- LIDAR Joint -->
@@ -201,6 +198,9 @@
       <wheel_radius>0.06</wheel_radius>
       <odom_publish_frequency>50</odom_publish_frequency>
       <topic>cmd_vel</topic>
+      <odom_topic>odom</odom_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
     </plugin>
   </gazebo>
 
