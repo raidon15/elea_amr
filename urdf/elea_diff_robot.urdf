@@ -131,66 +131,6 @@
     </visual>
   </link>
 
-  <!-- Front left control point -->
-  <link name="apf_front_left">
-    <visual>
-      <geometry>
-        <sphere radius="0.02"/>
-      </geometry>
-      <material name="red">
-        <color rgba="1 0 0 0.5"/>
-      </material>
-    </visual>
-  </link>
-
-  <!-- Front right control point -->
-  <link name="apf_front_right">
-    <visual>
-      <geometry>
-        <sphere radius="0.02"/>
-      </geometry>
-      <material name="red">
-        <color rgba="1 0 0 0.5"/>
-      </material>
-    </visual>
-  </link>
-
-  <!-- Rear center control point -->
-  <link name="apf_rear_center">
-    <visual>
-      <geometry>
-        <sphere radius="0.02"/>
-      </geometry>
-      <material name="red">
-        <color rgba="1 0 0 0.5"/>
-      </material>
-    </visual>
-  </link>
-
-  <!-- Left side control point -->
-  <link name="apf_left_side">
-    <visual>
-      <geometry>
-        <sphere radius="0.02"/>
-      </geometry>
-      <material name="red">
-        <color rgba="1 0 0 0.5"/>
-      </material>
-    </visual>
-  </link>
-
-  <!-- Right side control point -->
-  <link name="apf_right_side">
-    <visual>
-      <geometry>
-        <sphere radius="0.02"/>
-      </geometry>
-      <material name="red">
-        <color rgba="1 0 0 0.5"/>
-      </material>
-    </visual>
-  </link>
-
   <!-- LIDAR sensor -->
   <link name="lidar_link">
     <visual>
@@ -243,36 +183,6 @@
     <parent link="base_link"/>
     <child link="apf_front_center"/>
     <origin xyz="0.9245 0 0" rpy="0 0 0"/>
-  </joint>
-
-  <joint name="apf_front_left_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="apf_front_left"/>
-    <origin xyz="0.8 0.6 0" rpy="0 0 0"/>
-  </joint>
-
-  <joint name="apf_front_right_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="apf_front_right"/>
-    <origin xyz="0.8 -0.6 0" rpy="0 0 0"/>
-  </joint>
-
-  <joint name="apf_rear_center_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="apf_rear_center"/>
-    <origin xyz="-0.9245 0 0" rpy="0 0 0"/>
-  </joint>
-
-  <joint name="apf_left_side_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="apf_left_side"/>
-    <origin xyz="0 0.7225 0" rpy="0 0 0"/>
-  </joint>
-
-  <joint name="apf_right_side_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="apf_right_side"/>
-    <origin xyz="0 -0.7225 0" rpy="0 0 0"/>
   </joint>
 
   <!-- LIDAR Joint -->
