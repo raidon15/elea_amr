@@ -13,16 +13,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     # Get package directories for digilab world setup
-    try:
-        pkg_turtlebot4_ignition_bringup = get_package_share_directory('turtlebot4_ignition_bringup')
-        pkg_turtlebot4_ignition_gui_plugins = get_package_share_directory('turtlebot4_ignition_gui_plugins')
-        pkg_turtlebot4_description = get_package_share_directory('turtlebot4_description')
-        pkg_irobot_create_description = get_package_share_directory('irobot_create_description')
-        pkg_irobot_create_ignition_bringup = get_package_share_directory('irobot_create_ignition_bringup')
-        pkg_irobot_create_ignition_plugins = get_package_share_directory('irobot_create_ignition_plugins')
-        digilab_available = True
-    except:
-        digilab_available = False
+    
     
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
     
@@ -45,7 +36,7 @@ def generate_launch_description():
     resource_paths = []
     
     # Add digilab paths if they exist
-    digilab_map_path = '/home/benjamin/ros2_ws/install/ik_rmf_maps/share/ik_rmf_maps/maps/digilab'
+    digilab_map_path = '/home/benjamin/elea_ws/elea_amr/digilab'
     if os.path.exists(digilab_map_path):
         resource_paths.extend([
             digilab_map_path,
@@ -62,32 +53,15 @@ def generate_launch_description():
     # Add standard gazebo models path
     resource_paths.append(os.path.expandvars('$HOME/.gazebo/models'))
     
-    # Add turtlebot4 paths if available
-    if digilab_available:
-        resource_paths.extend([
-            os.path.join(pkg_turtlebot4_ignition_bringup, 'worlds'),
-            os.path.join(pkg_irobot_create_ignition_bringup, 'worlds'),
-            str(Path(pkg_turtlebot4_description).parent.resolve()),
-            str(Path(pkg_irobot_create_description).parent.resolve())
-        ])
+    
     
     ign_resource_path = SetEnvironmentVariable(
         name='IGN_GAZEBO_RESOURCE_PATH',
         value=':'.join(resource_paths)
     )
 
-    gui_plugin_paths = []
-    if digilab_available:
-        gui_plugin_paths.extend([
-            os.path.join(pkg_turtlebot4_ignition_gui_plugins, 'lib'),
-            os.path.join(pkg_irobot_create_ignition_plugins, 'lib')
-        ])
-    
-    ign_gui_plugin_path = SetEnvironmentVariable(
-        name='IGN_GUI_PLUGIN_PATH',
-        value=':'.join(gui_plugin_paths)
-    )
-
+   
+ 
     # Gazebo launch
     ign_gazebo_launch = PathJoinSubstitution(
         [pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py'])
@@ -126,7 +100,6 @@ def generate_launch_description():
 
     # Add environment variables first
     ld.add_action(ign_resource_path)
-    ld.add_action(ign_gui_plugin_path)
 
     # Declare the launch options
     ld.add_action(declare_world_cmd)
