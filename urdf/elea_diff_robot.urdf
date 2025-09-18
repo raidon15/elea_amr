@@ -25,6 +25,8 @@
     </inertial>
   </link>
 
+  <link name= "base_link_rotado">
+  </link> 
   <!-- Left differential wheel -->
   <link name="left_wheel">
     <visual>
@@ -119,14 +121,24 @@
     </collision>
   </link>
 
-  <!-- APF Control Points -->
-  <!-- Left center control point -->
-  <link name="apf_left_center">
+  <!-- APF Control Points - Four Corners -->
+  <!-- Front left corner control point -->
+  <link name="apf_front_left_corner">
     <!-- No visual geometry to avoid LIDAR detection -->
   </link>
 
-  <!-- Front center control point -->
-  <link name="apf_front_center">
+  <!-- Front right corner control point -->
+  <link name="apf_front_right_corner">
+    <!-- No visual geometry to avoid LIDAR detection -->
+  </link>
+
+  <!-- Rear left corner control point -->
+  <link name="apf_rear_left_corner">
+    <!-- No visual geometry to avoid LIDAR detection -->
+  </link>
+
+  <!-- Rear right corner control point -->
+  <link name="apf_rear_right_corner">
     <!-- No visual geometry to avoid LIDAR detection -->
   </link>
 
@@ -152,15 +164,21 @@
     </inertial>
   </link>
 
+  <joint name="joint_base_link_rotada" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_link_rotado"/>
+    <origin xyz="0 0 0" rpy="0 0 3.1416"/>
+  </joint>
+
   <!-- Joints -->
   <joint name="left_wheel_joint" type="continuous">
-    <parent link="base_link"/>
+    <parent link="base_link_rotado"/>
     <child link="left_wheel"/>
     <origin xyz="0 0.315 -0.35" rpy="1.5708 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
   <joint name="right_wheel_joint" type="continuous">
-    <parent link="base_link"/>
+    <parent link="base_link_rotado"/>
     <child link="right_wheel"/>
     <origin xyz="0 -0.315 -0.35" rpy="1.5708 0 0"/>
     <axis xyz="0 0 1"/>
@@ -177,17 +195,29 @@
   </joint>
 
 
-  <!-- APF Control Point Joints -->
-  <joint name="apf_left_center_joint" type="fixed">
+  <!-- APF Control Point Joints - Four Corners -->
+  <joint name="apf_front_left_corner_joint" type="fixed">
     <parent link="base_link"/>
-    <child link="apf_left_center"/>
-    <origin xyz="0 0.315 0.35" rpy="0 0 1.5708"/>
+    <child link="apf_front_left_corner"/>
+    <origin xyz="0.54 0.315 0.35" rpy="0 0 0"/>
   </joint>
 
-  <joint name="apf_front_center_joint" type="fixed">
+  <joint name="apf_front_right_corner_joint" type="fixed">
     <parent link="base_link"/>
-    <child link="apf_front_center"/>
-    <origin xyz="0.54 0 0.35" rpy="0 0 0"/>
+    <child link="apf_front_right_corner"/>
+    <origin xyz="0.54 -0.315 0.35" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="apf_rear_left_corner_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_rear_left_corner"/>
+    <origin xyz="-0.54 0.315 0.35" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="apf_rear_right_corner_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="apf_rear_right_corner"/>
+    <origin xyz="-0.54 -0.315 0.35" rpy="0 0 0"/>
   </joint>
 
   <!-- LIDAR Joint -->
@@ -200,8 +230,8 @@
   <!-- Gazebo Differential Drive Plugin -->
   <gazebo>
     <plugin filename="libignition-gazebo-diff-drive-system.so" name="ignition::gazebo::systems::DiffDrive">
-      <left_joint>left_wheel_joint</left_joint>
-      <right_joint>right_wheel_joint</right_joint>
+      <left_joint>right_wheel_joint</left_joint>
+      <right_joint>left_wheel_joint</right_joint>
       <wheel_separation>0.63</wheel_separation>
       <wheel_radius>0.06</wheel_radius>
       <odom_publish_frequency>50</odom_publish_frequency>
@@ -215,7 +245,7 @@
   <!-- Gazebo LIDAR Plugin -->
   <gazebo reference="lidar_link">
       <sensor name="lidar" type="gpu_lidar">
-        <pose>0 0 0 0 0 1.57</pose>
+        <pose>0 0 0 0 0 0</pose>
         <visualize>true</visualize>
         <update_rate>10</update_rate>
         <always_on>1</always_on>
