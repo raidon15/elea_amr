@@ -7,7 +7,7 @@
     <visual>
       <origin xyz="0 0 -0.35" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://elea_amr/urdf/KMP200.dae" scale="1 1 1"/>
+        <mesh filename="file:///workspaces/elea_ws/install/elea_amr/share/elea_amr/meshes/KMP200.dae" scale="1 1 1"/>
       </geometry>
       <material name="gray">
         <color rgba="0.6 0.6 0.6 1"/>
@@ -215,7 +215,7 @@
   <!-- Gazebo LIDAR Plugin -->
   <gazebo reference="lidar_link">
       <sensor name="lidar" type="gpu_lidar">
-        <pose>0 0 0 0 0 0</pose>
+        <pose>0 0 0 0 0 1.57</pose>
         <visualize>true</visualize>
         <update_rate>10</update_rate>
         <always_on>1</always_on>

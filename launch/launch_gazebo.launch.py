@@ -45,7 +45,7 @@ def generate_launch_description():
     
     # Add ik_rmf_assets if available
     try:
-        ik_rmf_assets_models = '/home/benjamin/elea_ws/elea_amr/ik_rmf_assets/models'
+        ik_rmf_assets_models = '/workspaces/elea_ws/src/elea_amr/ik_rmf_assets/models'
         resource_paths.append(ik_rmf_assets_models)
     except:
         pass

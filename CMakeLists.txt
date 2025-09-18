@@ -26,6 +26,10 @@ install(DIRECTORY launch
 install(DIRECTORY urdf
   DESTINATION share/${PROJECT_NAME}/)
 
+# Install mesh files
+install(DIRECTORY meshes
+  DESTINATION share/${PROJECT_NAME}/)
+
 # Disable testing for now
 # if(BUILD_TESTING)
 #   find_package(ament_lint_auto REQUIRED)

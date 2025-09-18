@@ -30,9 +30,9 @@ def generate_launch_description():
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
     
     # Launch configuration variables specific to simulation
-    x_pose = LaunchConfiguration('x_pose', default='10.0')
-    y_pose = LaunchConfiguration('y_pose', default='-30.0')
-    z_pose = LaunchConfiguration('z_pose', default='0.5')
+    x_pose = LaunchConfiguration('x_pose', default='0.0')
+    y_pose = LaunchConfiguration('y_pose', default='0.0')
+    z_pose = LaunchConfiguration('z_pose', default='0.6s')
     world = LaunchConfiguration('world')
     use_rviz = LaunchConfiguration('rviz', default='false')
     use_digilab = LaunchConfiguration('use_digilab', default='false')
@@ -43,7 +43,7 @@ def generate_launch_description():
         description='Specify namespace of the robot')
 
     declare_y_position_cmd = DeclareLaunchArgument(
-        'y_pose', default_value='-30.0',
+        'y_pose', default_value='0.0',
         description='Specify namespace of the robot')
         
     declare_z_position_cmd = DeclareLaunchArgument(
