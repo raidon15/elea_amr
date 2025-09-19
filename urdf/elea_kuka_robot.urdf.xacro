@@ -1,0 +1,455 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="elea_kuka_robot">
+
+  <!-- Include KUKA robot macro -->
+  <xacro:include filename="$(find kuka_lbr_iisy_support)/urdf/lbr_iisy3_r760_macro.xacro"/>
+  <xacro:include filename="$(find kuka_lbr_iisy_support)/urdf/lbr_iisy_ros2_control_macro.xacro"/>
+
+  <!-- Properties for configuration -->
+  <xacro:property name="wheel_radius" value="0.06"/>
+  <xacro:property name="wheel_length" value="0.04"/>
+  <xacro:property name="wheel_separation" value="0.63"/>
+  <xacro:property name="base_mass" value="8.0"/>
+  <xacro:property name="wheel_mass" value="0.5"/>
+
+  <!-- KUKA arm configuration arguments -->
+  <xacro:arg name="arm_prefix" default="arm_"/>
+  <xacro:arg name="arm_x" default="0.3"/>
+  <xacro:arg name="arm_y" default="0.0"/>
+  <xacro:arg name="arm_z" default="0.35"/>
+  <xacro:arg name="arm_roll" default="0.0"/>
+  <xacro:arg name="arm_pitch" default="0.0"/>
+  <xacro:arg name="arm_yaw" default="0.0"/>
+  <xacro:arg name="controller_ip" default="0.0.0.0"/>
+  <xacro:arg name="client_ip" default="0.0.0.0"/>
+  <xacro:arg name="mode" default="mock"/>
+
+  <!-- Main body -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 -0.35" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file:///workspaces/elea_ws/install/elea_amr/share/elea_amr/meshes/KMP200.dae" scale="1 1 1"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.6 0.6 0.6 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="1.08 0.63 0.7"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${base_mass}"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1"/>
+    </inertial>
+  </link>
+
+  <link name="base_link_rotado">
+  </link> 
+
+  <!-- Wheel macro -->
+  <xacro:macro name="wheel" params="prefix side reflect">
+    <link name="${prefix}_wheel">
+      <visual>
+        <geometry>
+          <cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0.1 0.1 0.1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="${wheel_mass}"/>
+        <origin xyz="0 0 0"/>
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      </inertial>
+    </link>
+
+    <gazebo reference="${prefix}_wheel">
+      <material>Gazebo/Black</material>
+      <mu1>1.0</mu1>
+      <mu2>1.0</mu2>
+      <kp>1000000.0</kp>
+      <kd>1.0</kd>
+    </gazebo>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link_rotado"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="0 ${reflect * wheel_separation/2} -0.35" rpy="1.5708 0 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Support wheel macro -->
+  <xacro:macro name="support_wheel" params="prefix x_pos">
+    <link name="${prefix}_support_wheel">
+      <visual>
+        <geometry>
+          <sphere radius="0.03"/>
+        </geometry>
+        <material name="white">
+          <color rgba="1 1 1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <sphere radius="0.03"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_support_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_support_wheel"/>
+      <origin xyz="${x_pos} 0 -0.38" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- APF control point macro -->
+  <xacro:macro name="apf_corner" params="corner_name x_pos y_pos">
+    <link name="apf_${corner_name}_corner">
+      <!-- No visual geometry to avoid LIDAR detection -->
+    </link>
+
+    <joint name="apf_${corner_name}_corner_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="apf_${corner_name}_corner"/>
+      <origin xyz="${x_pos} ${y_pos} 0.35" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- LIDAR sensor -->
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- Instantiate components -->
+  <joint name="joint_base_link_rotada" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_link_rotado"/>
+    <origin xyz="0 0 0" rpy="0 0 3.1416"/>
+  </joint>
+
+  <!-- Instantiate wheels -->
+  <xacro:wheel prefix="left" side="left" reflect="1"/>
+  <xacro:wheel prefix="right" side="right" reflect="-1"/>
+
+  <!-- Instantiate support wheels -->
+  <xacro:support_wheel prefix="front" x_pos="0.54"/>
+  <xacro:support_wheel prefix="rear" x_pos="-0.54"/>
+
+  <!-- Instantiate APF control points -->
+  <xacro:apf_corner corner_name="front_left" x_pos="0.54" y_pos="0.315"/>
+  <xacro:apf_corner corner_name="front_right" x_pos="0.54" y_pos="-0.315"/>
+  <xacro:apf_corner corner_name="rear_left" x_pos="-0.54" y_pos="0.315"/>
+  <xacro:apf_corner corner_name="rear_right" x_pos="-0.54" y_pos="-0.315"/>
+
+  <!-- LIDAR Joint -->
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 0.35" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Add KUKA arm components without the world link conflict -->
+  <!-- Create a custom macro based on the KUKA arm but without world link -->
+  
+  <!-- KUKA arm base_link -->
+  <link name="$(arg arm_prefix)base_link">
+    <collision>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/collision/base_link.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+    </collision>
+    <inertial>
+      <inertia ixx="0.012748224322771616" ixy="0.0" ixz="0.0" iyy="0.010816256892101183" iyz="0.0" izz="0.014034253414070816"/>
+      <mass value="3.6832E0"/>
+      <origin rpy="-1.635646718734919 -1.5587113211406542 -3.076430534295977" xyz="-0.010469427580225498 2.2191996713941945E-18 0.06527114050303555"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/visual/base_link.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+      <material name="kuka_white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- KUKA arm link_1 -->
+  <link name="$(arg arm_prefix)link_1">
+    <collision>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/collision/link_1.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00864540353780418" ixy="0.0" ixz="0.0" iyy="0.00573103463618732" iyz="0.0" izz="0.00974792600424334"/>
+      <mass value="3.2492E0"/>
+      <origin rpy="-1.5252872042613295 -0.9405332807925293 1.5213371149412753" xyz="-1.91677951495753E-4 0.024070491197833298 -0.0710631416964176"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/visual/link_1.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+      <material name="kuka_white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- KUKA arm link_2 -->
+  <link name="$(arg arm_prefix)link_2">
+    <collision>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/collision/link_2.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+    </collision>
+    <inertial>
+      <inertia ixx="0.0158343577269089" ixy="0.0" ixz="0.0" iyy="0.0142528240960669" iyz="0.0" izz="0.00408654915859037"/>
+      <mass value="3.4818E0"/>
+      <origin rpy="1.5708 0.0 0.0" xyz="4.44659081583317E-4 0.0 0.135724924504361"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/visual/link_2.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+      <material name="kuka_white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- KUKA arm link_3 -->
+  <link name="$(arg arm_prefix)link_3">
+    <collision>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/collision/link_3.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00789073783356045" ixy="0.0" ixz="0.0" iyy="0.00520904856637106" iyz="0.0" izz="0.00891221654847826"/>
+      <mass value="2.9446E0"/>
+      <origin rpy="-1.5258872042613295 -0.9405332807925293 1.5213371149412753" xyz="-1.73583006298915E-4 0.0218098876760659 -0.0643849540772356"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/visual/link_3.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+      <material name="kuka_white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- KUKA arm link_4 -->
+  <link name="$(arg arm_prefix)link_4">
+    <collision>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/collision/link_4.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+    </collision>
+    <inertial>
+      <inertia ixx="0.0120675248153156" ixy="0.0" ixz="0.0" iyy="0.0108242825084317" iyz="0.0" izz="0.00309377121382749"/>
+      <mass value="2.5478E0"/>
+      <origin rpy="1.5708 0.0 0.0" xyz="3.25096251424838E-4 0.0 0.0992644949594819"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/visual/link_4.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+      <material name="kuka_white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- KUKA arm link_5 -->
+  <link name="$(arg arm_prefix)link_5">
+    <collision>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/collision/link_5.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+    </collision>
+    <inertial>
+      <inertia ixx="0.0058444779292734" ixy="0.0" ixz="0.0" iyy="0.00385950969398899" iyz="0.0" izz="0.00662077854949819"/>
+      <mass value="2.318E0"/>
+      <origin rpy="-1.5258872042613295 -0.9405332807925293 1.5213371149412753" xyz="-1.36686039016397E-4 0.0171840729441743 -0.0507423584622795"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/visual/link_5.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+      <material name="kuka_white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- KUKA arm link_6 -->
+  <link name="$(arg arm_prefix)link_6">
+    <collision>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/collision/link_6.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+    </collision>
+    <inertial>
+      <inertia ixx="0.00134068336616753" ixy="0.0" ixz="0.0" iyz="0.0" iyy="0.00134068336616753" izz="0.00220754572844598"/>
+      <mass value="1.3288E0"/>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -2.4456E-2"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://kuka_lbr_iisy_support/meshes/lbr_iisy3_r760/visual/link_6.stl"/>
+      </geometry>
+      <origin rpy="-0.0 0.0 -0.0" xyz="0.0 0.0 0.0"/>
+      <material name="kuka_white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- KUKA arm joints - temporarily fixed for initial setup with correct geometry -->
+  <joint name="$(arg arm_prefix)joint_1" type="fixed">
+    <origin rpy="0.0 0.0 3.14" xyz="0.0 0.0 0.1264"/>
+    <parent link="$(arg arm_prefix)base_link"/>
+    <child link="$(arg arm_prefix)link_1"/>
+  </joint>
+
+  <joint name="$(arg arm_prefix)joint_2" type="fixed">
+    <origin rpy="-1.5707963267948966 0.0 0.0" xyz="0.0 0.0 0.0886"/>
+    <parent link="$(arg arm_prefix)link_1"/>
+    <child link="$(arg arm_prefix)link_2"/>
+  </joint>
+
+  <joint name="$(arg arm_prefix)joint_3" type="fixed">
+    <origin rpy="0.0 0.0 -2.8" xyz="0.3 0.0 0.0"/>
+    <parent link="$(arg arm_prefix)link_2"/>
+    <child link="$(arg arm_prefix)link_3"/>
+  </joint>
+
+  <joint name="$(arg arm_prefix)joint_4" type="fixed">
+    <origin rpy="1.5707963267948966 0.0 0.0" xyz="0.0 0.0 0.0"/>
+    <parent link="$(arg arm_prefix)link_3"/>
+    <child link="$(arg arm_prefix)link_4"/>
+  </joint>
+
+  <joint name="$(arg arm_prefix)joint_5" type="fixed">
+    <origin rpy="-1.5707963267948966 0.8 0.0" xyz="0.0 0.0 -0.3"/>
+    <parent link="$(arg arm_prefix)link_4"/>
+    <child link="$(arg arm_prefix)link_5"/>
+  </joint>
+
+  <joint name="$(arg arm_prefix)joint_6" type="fixed">
+    <origin rpy="1.5707963267948966 0.0 0.0" xyz="0.0 0.0 0.0"/>
+    <parent link="$(arg arm_prefix)link_5"/>
+    <child link="$(arg arm_prefix)link_6"/>
+  </joint>
+
+  <!-- Connect KUKA arm base to robot base -->
+  <joint name="arm_mounting_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="$(arg arm_prefix)base_link"/>
+    <origin xyz="$(arg arm_x) $(arg arm_y) $(arg arm_z)" rpy="$(arg arm_roll) $(arg arm_pitch) $(arg arm_yaw)"/>
+  </joint>
+
+  <!-- Add KUKA ROS2 control interface - commented out for now to avoid conflicts -->
+  <!--
+  <xacro:kuka_lbr_iisy_ros2_control 
+    name="$(arg arm_prefix)lbr_iisy3_r760" 
+    prefix="$(arg arm_prefix)" 
+    controller_ip="$(arg controller_ip)" 
+    client_ip="$(arg client_ip)" 
+    mode="$(arg mode)" 
+    roundtrip_time="0" 
+    qos_config_file=""/>
+  -->
+
+  <!-- Gazebo Differential Drive Plugin -->
+  <gazebo>
+    <plugin filename="libignition-gazebo-diff-drive-system.so" name="ignition::gazebo::systems::DiffDrive">
+      <left_joint>right_wheel_joint</left_joint>
+      <right_joint>left_wheel_joint</right_joint>
+      <wheel_separation>${wheel_separation}</wheel_separation>
+      <wheel_radius>${wheel_radius}</wheel_radius>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <topic>cmd_vel</topic>
+      <odom_topic>odom</odom_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+    </plugin>
+  </gazebo>
+
+  <!-- Gazebo LIDAR Plugin -->
+  <gazebo reference="lidar_link">
+      <sensor name="lidar" type="gpu_lidar">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>true</visualize>
+        <update_rate>10</update_rate>
+        <always_on>1</always_on>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>360</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>30.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </lidar>
+        <plugin filename="libgz-sim-sensors-system.so" name="gz::sim::systems::Sensors">
+          <topic>lidar/scan</topic>
+        </plugin>
+      </sensor>
+  </gazebo>
+
+</robot>
