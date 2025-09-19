@@ -4,6 +4,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
 
@@ -67,6 +68,13 @@ def generate_launch_description():
         default_value='0.0',
         description='Yaw orientation of the arm'
     )
+    
+    # Add use_digilab argument for world-specific LIDAR topics
+    use_digilab_arg = DeclareLaunchArgument(
+        'use_digilab',
+        default_value='false',
+        description='Use digilab world topics instead of empty world topics'
+    )
 
     # Robot description
     robot_description = Command([
@@ -121,7 +129,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    # ROS-Gazebo bridge
+    # ROS-Gazebo bridge (for empty world)
     ros_gz_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -129,9 +137,56 @@ def generate_launch_description():
         arguments=[
             '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
             '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
-            '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
-            '/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry',
+            '/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist',
+            '/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry',
+            '/world/empty/model/elea_kuka_robot/link/base_link/sensor/lidar/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
+            '--ros-args', '-r', '/world/empty/model/elea_kuka_robot/link/base_link/sensor/lidar/scan:=/scan'
         ],
+        output='screen',
+        condition=UnlessCondition(LaunchConfiguration('use_digilab'))
+    )
+
+    # Bridge for digilab world
+    ros_gz_bridge_digilab = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='parameter_bridge_digilab',
+        arguments=[
+            '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
+            '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
+            '/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist',
+            '/odom@nav_msgs/msg/Odometry@ignition.msgs.Odometry',
+            '/world/digilab/model/elea_kuka_robot/link/base_link/sensor/lidar/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
+            '--ros-args', '-r', '/world/digilab/model/elea_kuka_robot/link/base_link/sensor/lidar/scan:=/scan'
+        ],
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('use_digilab'))
+    )
+
+    # Static transform for lidar frame compatibility
+    static_transform_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='lidar_frame_publisher',
+        arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'elea_kuka_robot/base_link/lidar'],
+        output='screen'
+    )
+
+    # Static transform for base_footprint
+    base_footprint_transform_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_footprint_publisher',
+        arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint'],
+        output='screen'
+    )
+
+    # Laser scan frame filter to fix frame_id
+    laser_frame_filter_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='laser_frame_filter',
+        arguments=['0', '0', '0.35', '0', '0', '0', 'base_link', 'lidar_link'],
         output='screen'
     )
 
@@ -145,8 +200,13 @@ def generate_launch_description():
         arm_roll_arg,
         arm_pitch_arg,
         arm_yaw_arg,
+        use_digilab_arg,
         robot_state_publisher_node,
         robot_state_publisher,
         spawn_robot,
-        ros_gz_bridge
+        ros_gz_bridge,
+        ros_gz_bridge_digilab,
+        static_transform_node,
+        base_footprint_transform_node,
+        laser_frame_filter_node
     ])
